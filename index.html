@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Synonyme</title>
+
+    <script>     
+        async function getSynonyms() { // async ermöglicht, dass man await benutzen kann
+            let query = document.getElementById('searchQuery').value; // Inhalt des Suche-Inputs
+            let url = `https://www.openthesaurus.de/synonyme/search?q=${query}&format=application/json`;
+            let response = await fetch(url); // inhalt aus der URL herunterladen, await => erst mit dem nächsten Schritt weitermachen wenn es runtergeladen wurde
+            let responseAsJson = await response.json(); // der Inhalt der URL wird als JSON geladen
+            let synsets = responseAsJson['synsets']; // Inhalt des JSONs 'responseAsJson' an der Stelle 'synsets' 
+            renderSynsets(synsets);
+
+            console.log('Response is', responseAsJson);
+        }
+
+        function renderSynsets(synsets) { // synsets ist ein Array mit den ganzen synsets drin
+            let container = document.getElementById('container');
+            container.innerHTML = `<div>Es wurden <b>${synsets.length}</b> Synonym-Sets geladen.</div>`;
+
+            for (let i = 0; i < synsets.length; i++) {
+                const synset = synsets[i]; // dröselt das array synsets in die einelnen Sets auf
+                let terms = synset['terms']; // terms ist ein Array im Array. Um dieses darzustellen brauchen wir eine for-Schleife
+                container.innerHTML += `<h2>Synonym mit ID = ${synset['id']}</h2>`;
+
+                for (let j = 0; j < terms.length; j++) {
+                    const term = terms[j]; // term an der Stelle j aus dem array terms
+                    container.innerHTML += `<div>${term['term']}</div>`; // in terms[j] gibt es ein feld namens term, das wollen wir auslesen. etwas irreführend ist, dass wir terms[j] einer gleichnamigen Variable zugewiesen haben. Aber deswegen sagen wir hier term['term']
+                }
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <input id="searchQuery" type="text">
+    <button onclick="getSynonyms()">Synonyme</button>
+
+    <div id="container"></div>
+</body>
+
+</html>
